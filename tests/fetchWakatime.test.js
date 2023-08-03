@@ -2,6 +2,8 @@ import "@testing-library/jest-dom";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import { fetchWakatimeStats } from "../src/fetchers/wakatime-fetcher.js";
+import { expect, it, describe, afterEach } from "@jest/globals";
+
 const mock = new MockAdapter(axios);
 
 afterEach(() => {
@@ -105,7 +107,7 @@ describe("Wakatime fetcher", () => {
     const username = "anuraghazra";
     mock
       .onGet(
-        `https://wakatime.com/api/v1/users/${username}/stats/?is_including_today=true`,
+        `https://wakatime.com/api/v1/users/${username}/stats?is_including_today=true`,
       )
       .reply(200, wakaTimeData);
 
