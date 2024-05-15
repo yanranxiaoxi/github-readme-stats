@@ -87,7 +87,9 @@ const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
 const cartesianToPolar = (centerX, centerY, x, y) => {
   const radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
   let angleInDegrees = radiansToDegrees(Math.atan2(y - centerY, x - centerX));
-  if (angleInDegrees < 0) angleInDegrees += 360;
+  if (angleInDegrees < 0) {
+    angleInDegrees += 360;
+  }
   return { radius, angleInDegrees };
 };
 
@@ -201,7 +203,7 @@ const trimTopLanguages = (topLangs, langs_count, hide) => {
  * @param {number} props.width The card width
  * @param {string} props.color Color of the programming language.
  * @param {string} props.name Name of the programming language.
- * @param {string} props.progress Usage of the programming language in percentage.
+ * @param {number} props.progress Usage of the programming language in percentage.
  * @param {number} props.index Index of the programming language.
  * @returns {string} Programming language SVG node.
  */
@@ -329,7 +331,9 @@ const renderNormalLayout = (langs, width, totalLanguageSize) => {
         width,
         name: lang.name,
         color: lang.color || DEFAULT_LANG_COLOR,
-        progress: ((lang.size / totalLanguageSize) * 100).toFixed(2),
+        progress: parseFloat(
+          ((lang.size / totalLanguageSize) * 100).toFixed(2),
+        ),
         index,
       });
     }),
@@ -379,14 +383,14 @@ const renderCompactLayout = (langs, width, totalLanguageSize, hideProgress) => {
 
   return `
   ${
-    !hideProgress
-      ? `
-  <mask id="rect-mask">
-      <rect x="0" y="0" width="${offsetWidth}" height="8" fill="white" rx="5"/>
-    </mask>
-    ${compactProgressBar}
-  `
-      : ""
+    hideProgress
+      ? ""
+      : `
+      <mask id="rect-mask">
+          <rect x="0" y="0" width="${offsetWidth}" height="8" fill="white" rx="5"/>
+        </mask>
+        ${compactProgressBar}
+      `
   }
     <g transform="translate(0, ${hideProgress ? "0" : "25"})">
       ${createLanguageTextNode({
@@ -662,13 +666,18 @@ const renderDonutLayout = (langs, width, totalLanguageSize) => {
 };
 
 /**
+ * @typedef {import("./types").TopLangOptions} TopLangOptions
+ * @typedef {TopLangOptions["layout"]} Layout
+ */
+
+/**
  * Creates the no languages data SVG node.
  *
  * @param {object} props Object with function properties.
  * @param {string} props.color No languages data text color.
  * @param {string} props.text No languages data translated text.
- * @param {import("./types").TopLangOptions["layout"] | undefined} props.layout Card layout.
- * @return {string} No languages data SVG node string.
+ * @param {Layout | undefined} props.layout Card layout.
+ * @returns {string} No languages data SVG node string.
  */
 const noLanguagesDataNode = ({ color, text, layout }) => {
   return `
@@ -682,9 +691,9 @@ const noLanguagesDataNode = ({ color, text, layout }) => {
  * Get default languages count for provided card layout.
  *
  * @param {object} props Function properties.
- * @param {import("./types").TopLangOptions["layout"]=} props.layout Input layout string.
+ * @param {Layout=} props.layout Input layout string.
  * @param {boolean=} props.hide_progress Input hide_progress parameter value.
- * @return {number} Default languages count for input layout.
+ * @returns {number} Default languages count for input layout.
  */
 const getDefaultLanguagesCountByLayout = ({ layout, hide_progress }) => {
   if (layout === "compact" || hide_progress === true) {
@@ -701,16 +710,20 @@ const getDefaultLanguagesCountByLayout = ({ layout, hide_progress }) => {
 };
 
 /**
+ * @typedef {import('../fetchers/types').TopLangData} TopLangData
+ */
+
+/**
  * Renders card that display user's most frequently used programming languages.
  *
- * @param {import('../fetchers/types').TopLangData} topLangs User's most frequently used programming languages.
- * @param {Partial<import("./types").TopLangOptions>} options Card options.
+ * @param {TopLangData} topLangs User's most frequently used programming languages.
+ * @param {Partial<TopLangOptions>} options Card options.
  * @returns {string} Language card SVG object.
  */
 const renderTopLanguages = (topLangs, options = {}) => {
   const {
     hide_title = false,
-    hide_border,
+    hide_border = false,
     card_width,
     title_color,
     text_color,
@@ -742,8 +755,8 @@ const renderTopLanguages = (topLangs, options = {}) => {
     ? isNaN(card_width)
       ? DEFAULT_CARD_WIDTH
       : card_width < MIN_CARD_WIDTH
-      ? MIN_CARD_WIDTH
-      : card_width
+        ? MIN_CARD_WIDTH
+        : card_width
     : DEFAULT_CARD_WIDTH;
   let height = calculateNormalLayoutHeight(langs.length);
 
@@ -797,7 +810,9 @@ const renderTopLanguages = (topLangs, options = {}) => {
     colors,
   });
 
-  if (disable_animations) card.disableAnimations();
+  if (disable_animations) {
+    card.disableAnimations();
+  }
 
   card.setHideBorder(hide_border);
   card.setHideTitle(hide_title);
